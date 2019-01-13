@@ -12,4 +12,3 @@ comments: true
 베이스 캠프가 시작되었다.
 기대된다.
 
-<div id="disqus_thread"></div>
