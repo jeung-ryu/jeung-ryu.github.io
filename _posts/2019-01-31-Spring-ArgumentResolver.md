@@ -8,22 +8,22 @@ tags:
   - basecamp
 comments: true
 ---
-### 스프링의 HandlerMethodArgumentResolver에 대해서 알아보고자 한다.
+스프링의 HandlerMethodArgumentResolver에 대해서 알아보고자 한다.
 HandlerMethodArgumentResolver를 포스팅하는 이유는 
 이메일 서비스에서 권한문제를 처리하기 위함이다.
 
-기존에 request 세션을 호출하여 유저 정보를 읽어오는 방식을 개선 할 수 있다.
+기존에 request 세션을 일일이 호출하여 유저 정보를 읽어오는 방식을 개선 할 수 있다.
 
 먼저, HandlerMethodArgumentResolver를 살펴보기에 앞서 스프링의 전체적이 구조를 살펴보자.
 
 ![Spring Mvc 구조](/assets/images/argument1.PNG)
 
-스프링에서는 DispatcherServlet가 중요한 역할을 하는데
+스프링에서는 DispatcherServlet이 중요한 역할을 하는데
 1. request가 들어오면 요청에 적합하게 매핑되는 controller를 선택한다.
 2. 선택한 controller method 가 어떠한 구조라도 일관되게 실행해준다.
 3. return 받은 값에 따라서 적합한 View를 선택하여 응답한다.
 
-이때, DispatcherServlet가 사용하는 객체는
+이때, DispatcherServlet이 사용하는 객체는
 1. 적합한 controller ( = handler)를 선택하는데 HandlerMapping 객체를 사용한다.
 2. 동일한 방식으로 controller method를 실행하기 위해 HandlerAdapter를 사용한다.
 3. 적합한 View를 결정하기 위해 ViewResolver를 사용한다.
@@ -36,6 +36,8 @@ HandlerMethodArgumentResolver를 포스팅하는 이유는
 > 'Strategy interface for resolving method parameters into argument values in the context of a given request.'
 
 메소드의 파라미터를 request의 인자값으로 변형시키는 전략인터페이스라고 한다.
+
+이것이 무슨말일까?
 Controller method 파라미터에 @RequestParam, @PathVariable, HttpServletRequest, HttpSession을 넣어 사용해 보았을 것이다.
 ```java
 @Controller
@@ -59,6 +61,7 @@ public class SendMailController {
 이렇게 파라미터에 요청값을 적절하게 넣어줘서 사용할 수 있도록 하는 것이 HandlerMethodArgumentResolver 의 역할이다.
 
 아래는 RequestMappingHandlerAdapter의 HandlerMethodArgumentResolver 리스트를 get하는 함수다.
+스프링의 DefaultArgumentResolver가 많이 있다는 것을 알 수 있다.
 ```java
 	private List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers() {
 		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
@@ -115,7 +118,7 @@ HandlerAdapter는 Handler(=controller)를 선택한 이후 실행 가능 하도�
 
 ![Spring Mvc ArgumentResolver](/assets/images/argument3.PNG)
 
-컨트롤러의 메소드를 호출하게 되면 파라미터 하나당 HandlerMethodArgumentResolver를 적용할 수 있는지 검사하는 구문이 돌아간다.
+컨트롤러의 메소드를 호출하게 되면 해당 파라미터에 어떠한 HandlerMethodArgumentResolver를 적용할 수 있는지 검사하는 구문이 돌아간다.
 적용 가능한 파라미터일 때 HandlerMethodArgumentResolver는 request, session 등에서 값을 읽어와 파라미터 타입에 적절하게 변경시켜준다.
 
 따라서 HandlerMethodArgumentResolver는 다음과 같은 역할을 해야한다.
@@ -137,10 +140,12 @@ public interface HandlerMethodArgumentResolver {
 2. resolveArgument()는 값을 변형하는 로직이다.
 
 
-Custom HandlerMethodArgumentResolver를 사용하고 싶다면 다음과 같이 한다.
+Custom HandlerMethodArgumentResolver를 사용하고 싶다면 위 인터페이스를 구현하면 된다.
+
+정확히는 다음과 같이 한다.
 1. 파라미터에 사용할 사용자정의클래스를 만든다.
 2. HandlerMethodArgumentResolver를 구현한 클래스를 만들고, resolveArgument() 메소드로 사용자정의클래스를 리턴한다.
-3. CustomResolver를 스프링에서 사용가능한 addArgumentResolvers에 등록한다.
+3. CustomResolver를 스프링에서 사용할 수 있도록 ArgumentResolvers에 등록한다.
 
 
 
@@ -165,7 +170,7 @@ userName은 session에서 받아온다.
 public class Mail {
 	private String title;
 	private String content;
-  private String userName;
+    private String userName;
 
   // setter, getter
 }
@@ -186,13 +191,13 @@ public class MailHandlerMethodArgumentResolver implements HandlerMethodArgumentR
     Mail mail = new Mail();
     mail.setTitle(webRequest.getParameter("title"));
     mail.setContent(webRequest.getParameter("content"));
-    mail.setTitle(webRequest.getAttribute("userName", WebRequest.SCOPE_SESSION));
+    mail.setUserName(webRequest.getAttribute("userName", WebRequest.SCOPE_SESSION));
     return mail;
   }
 }
 ```
 
-CustomArgumentResolver 등록
+스프링에서 사용가능 하도록 CustomArgumentResolver 등록
 ```java
 @Configuration
 @EnableWebMvc
