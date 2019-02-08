@@ -200,7 +200,6 @@ public class MailHandlerMethodArgumentResolver implements HandlerMethodArgumentR
 스프링에서 사용가능 하도록 CustomArgumentResolver 등록
 ```java
 @Configuration
-@EnableWebMvc
 public class WebMvcConfig extends WebMvcConfigurerAdapter {
     
     @Bean
