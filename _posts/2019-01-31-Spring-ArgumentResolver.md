@@ -19,12 +19,12 @@ HandlerMethodArgumentResolver를 포스팅하는 이유는
 ![Spring Mvc 구조](/assets/images/argument1.PNG)
 
 스프링에서는 DispatcherServlet이 중요한 역할을 하는데
-1. request가 들어오면 요청에 적합하게 매핑되는 controller를 선택한다.
+1. request가 들어오면 요청에 적합하게 매핑되는 controller method를 선택한다.
 2. 선택한 controller method 가 어떠한 구조라도 일관되게 실행해준다.
 3. return 받은 값에 따라서 적합한 View를 선택하여 응답한다.
 
 이때, DispatcherServlet이 사용하는 객체는
-1. 적합한 controller ( = handler)를 선택하는데 HandlerMapping 객체를 사용한다.
+1. 적합한 controller method (= handler)를 선택하는데 HandlerMapping 객체를 사용한다.
 2. 동일한 방식으로 controller method를 실행하기 위해 HandlerAdapter를 사용한다.
 3. 적합한 View를 결정하기 위해 ViewResolver를 사용한다.
 
@@ -112,7 +112,7 @@ public class SendMailController {
 HandlerAdapter가 컨트롤러를 실행하기 전에 파라미터 값을 채우기 위해 HandlerMethodArgumentResolver의 도움을 받는다.
 ![Spring Mvc ArgumentResolver](/assets/images/argument2.PNG)
 
-HandlerAdapter는 Handler(=controller)를 선택한 이후 실행 가능 하도록 InvocableHandlerMethod로 감싼다.
+HandlerAdapter는 Handler(=controller method)를 선택한 이후 실행 가능 하도록 InvocableHandlerMethod로 감싼다.
 이때 해당 메소드의 파라미터를 처리할 HandlerMethodArgumentResolvers를 세팅한다.
 또한 리턴값을 처리하는 HandlerMethodReturnValueHandlers 등등을 세팅한다.
 
